@@ -33,7 +33,7 @@ def play_gym(agent, environment):
         )
         if len(actions.shape) > 1:
             actions = actions[0, :]
-        observations, reward, done, info = environment.step(actions)
+        observations, reward, truncated, done, info = environment.step(actions)
         tendon_states = environment.tendon_states
         environment.render()
 
@@ -232,6 +232,7 @@ def play(path, checkpoint, seed, header, agent, environment):
     agent = eval(agent)
 
     # Build the environment.
+    environment = environment[:-1] + ', render_mode="human")'
     environment = eval(environment)
     environment.seed(seed)
 

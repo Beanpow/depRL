@@ -84,7 +84,7 @@ class ExceptionWrapper(AbstractWrapper):
         super().__init__(*args, **kwargs)
 
     def reset(self, **kwargs):
-        observation = super().reset(**kwargs)
+        observation = super().reset(**kwargs)[0]
         if not np.any(np.isnan(observation)):
             self.last_observation = observation.copy()
         else:
@@ -93,7 +93,7 @@ class ExceptionWrapper(AbstractWrapper):
 
     def step(self, action):
         try:
-            observation, reward, done, info = super().step(action)
+            observation, reward, truncated, done, info = super().step(action)
             if np.any(np.isnan(observation)):
                 raise Exception()
         except Exception as e:
@@ -103,7 +103,7 @@ class ExceptionWrapper(AbstractWrapper):
             reward = 0
             done = 1
             self.reset()
-        return observation, reward, done, info
+        return observation, reward, truncated, done, info
 
 
 class GymWrapper(ExceptionWrapper):
@@ -113,20 +113,20 @@ class GymWrapper(ExceptionWrapper):
 
     def render(self, *args, **kwargs):
         kwargs["mode"] = "window"
-        self.unwrapped.sim.render(*args, **kwargs)
+        self.unwrapped.render(*args, **kwargs)
 
     def muscle_lengths(self):
-        length = self.unwrapped.sim.data.actuator_length
+        length = self.unwrapped.data.actuator_length
         return length
 
     def muscle_forces(self):
-        return self.unwrapped.sim.data.actuator_force
+        return self.unwrapped.data.actuator_force
 
     def muscle_velocities(self):
-        return self.unwrapped.sim.data.actuator_velocity
+        return self.unwrapped.data.actuator_velocity
 
     def muscle_activity(self):
-        return self.unwrapped.sim.data.act
+        return self.unwrapped.data.act
 
     @property
     def _max_episode_steps(self):

@@ -52,7 +52,7 @@ class Sequential:
         tendon_states = []
 
         for i in range(len(self.environments)):
-            ob, rew, term, env_info = self.environments[i].step(actions[i])
+            ob, rew, term, done, env_info = self.environments[i].step(actions[i])
             muscle = self.environments[i].tendon_states
             self.lengths[i] += 1
             # Timeouts trigger resets but are not true terminations.
@@ -225,7 +225,7 @@ def distribute(
     """Distributes workers over parallel and sequential groups."""
 
     dummy_environment = build_env_from_dict(build_dict)()
-    max_episode_steps = dummy_environment._max_episode_steps
+    max_episode_steps = dummy_environment.spec.max_episode_steps
     del dummy_environment
 
     if worker_groups < 2:
